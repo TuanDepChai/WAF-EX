@@ -7,6 +7,8 @@ const errorHandler = require('./middleware/errorHandler');
 // Import routes
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
+const planRoutes = require('./routes/planRoutes');
+const transactionRoutes = require('./routes/transactionRoutes');
 
 const app = express();
 
@@ -25,6 +27,8 @@ app.get('/', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/plans', planRoutes);
+app.use('/api/transactions', transactionRoutes);
 
 // Error Handler (should be last)
 app.use(errorHandler);
