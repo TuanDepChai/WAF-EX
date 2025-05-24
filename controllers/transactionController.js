@@ -3,7 +3,14 @@ const { generateToken } = require('../helpers/authHelper'); // If you want to us
 const crypto = require('crypto');
 
 // Helper to generate activation key
-const generateActivationKey = () => crypto.randomBytes(16).toString('hex');
+const generateActivationKey = () => {
+  let finalKey = '';
+  for(let i = 0; i < 4; i++) {
+    const key = crypto.randomBytes(4).toString('hex') + '-';
+    finalKey += key;
+  }
+  return finalKey.slice(0, -1);
+}
 
 // Get all transactions
 exports.getTransactions = async (req, res) => {
@@ -26,15 +33,20 @@ exports.getTransaction = async (req, res) => {
   }
 };
 
+// Get user transactions
+exports.getUserTransactions = async (req, res) => {
+  try {
+    const transactions = await Transaction.find({ user: req.user._id }).populate('plan');
+    res.json(transactions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Create transaction
 exports.createTransaction = async (req, res) => {
   try {
     const { user, plan } = req.body;
-    // check duplicate transaction
-    const duplicateTransaction = await Transaction.findOne({ user, plan });
-    if (duplicateTransaction) {
-      return res.status(400).json({ message: 'Duplicate transaction' });
-    }
     // generate activation key
     const activateKey = generateActivationKey();
     const transaction = new Transaction({
