@@ -7,6 +7,10 @@ const {
   updateUser,
   deleteUser
 } = require('../controllers/userController');
+const { protect } = require('../middleware/auth');
+
+// Protect all user routes
+router.use(protect);
 
 // User routes
 router.route('/')

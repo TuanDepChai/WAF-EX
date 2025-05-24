@@ -6,9 +6,9 @@ const errorHandler = require('./middleware/errorHandler');
 
 // Import routes
 const userRoutes = require('./routes/userRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
-const port = process.env.PORT || 3000;
 
 // Connect to MongoDB
 connectDB();
@@ -17,24 +17,21 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
-// Routes
+// Base route
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to the Express API!' });
 });
 
-// Example API endpoint
-app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello from the API!' });
-});
-
 // API Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 
-// Error Handler
+// Error Handler (should be last)
 app.use(errorHandler);
 
 // Start server
 if (process.env.NODE_ENV !== 'production') {
+  const port = process.env.PORT || 3000;
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
