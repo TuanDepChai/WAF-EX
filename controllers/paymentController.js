@@ -1,6 +1,16 @@
 const Transaction = require('../models/Transaction');
 const Plan = require('../models/Plan');
 const { createPaymentUrl, verifyReturnUrl } = require('../helpers/vnpayHelper');
+const License = require('../models/License');
+
+const generateLicenseKey = () => {
+    let finalKey = '';
+    for (let i = 0; i < 4; i++) {
+        const key = Math.random().toString(16).slice(2, 10) + '-';
+        finalKey += key;
+    }
+    return finalKey.slice(0, -1);
+}
 
 // Create VNPay payment URL
 exports.createVNPayPayment = async (req, res) => {
@@ -79,13 +89,13 @@ exports.vnpayReturn = async (req, res) => {
             await transaction.save();
 
             // Create license for the user
-            const licenseController = require('./licenseController');
-            const license = await licenseController.createLicense({
-                body: {
-                    user: transaction.user,
-                    plan: transaction.plan
-                }
+            const licenseKey = generateLicenseKey();
+            const license = new License({
+                user: transaction.user,
+                plan: transaction.plan,
+                licenseKey
             });
+            await license.save();
 
             console.log('License created for transaction:', transactionId);
 

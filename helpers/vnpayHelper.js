@@ -45,6 +45,7 @@ exports.createPaymentUrl = (orderId, amount, orderInfo, orderType = 'other') => 
             if (!value || value === '' || value === undefined || value === null) {
                 return;
             }
+            console.log(`Appending param: ${key} = ${value.toString()}`);
             redirectUrl.searchParams.append(key, value.toString());
         });
 
@@ -55,6 +56,9 @@ exports.createPaymentUrl = (orderId, amount, orderInfo, orderType = 'other') => 
         .update(Buffer.from(redirectUrl.search.slice(1).toString(), 'utf-8'))
         .digest('hex');
 
+    console.log('Signed:', signed);
+    
+
     redirectUrl.searchParams.append('vnp_SecureHash', signed);
 
     return redirectUrl.toString();
@@ -62,17 +66,28 @@ exports.createPaymentUrl = (orderId, amount, orderInfo, orderType = 'other') => 
 
 // Verify return URL
 exports.verifyReturnUrl = (vnpParams) => {
-    const secureHash = vnpParams['vnp_SecureHash'];
-    delete vnpParams['vnp_SecureHash'];
-    delete vnpParams['vnp_SecureHashType'];
+    // Clone and clean params
+    const params = { ...vnpParams };
+    const secureHash = params['vnp_SecureHash'];
+    delete params['vnp_SecureHash'];
+    delete params['vnp_SecureHashType'];
 
-    // Sort params alphabetically
-    const sortedParams = sortObject(vnpParams);
-    
-    // Create sign data
-    const signData = querystring.stringify(sortedParams, { encode: false });
-    const hmac = crypto.createHmac('sha512', config.vnp_HashSecret);
-    const signed = hmac.update(new Buffer(signData, 'utf-8')).digest('hex');
+    // Sort and build the query string as in createPaymentUrl
+    const sortedEntries = Object.entries(params)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .sort(([key1], [key2]) => key1.localeCompare(key2));
+
+    const queryString = sortedEntries
+        .map(([key, value]) => `${key}=${encodeURIComponent(value.toString()).replace(/%20/g, '+')}`)
+        .join('&');
+
+    // Hash
+    const hmac = require('crypto').createHmac('sha512', config.vnp_HashSecret);
+    const signed = hmac.update(Buffer.from(queryString, 'utf-8')).digest('hex');
+
+    console.log('String to hash:', queryString);
+    console.log('Expected hash:', secureHash);
+    console.log('Generated hash:', signed);
 
     return secureHash === signed;
 };

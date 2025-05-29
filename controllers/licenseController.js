@@ -4,8 +4,8 @@ const crypto = require('crypto');
 // Helper to generate license key
 const generateLicenseKey = () => {
   let finalKey = '';
-  for(let i = 0; i < 4; i++) {
-    const key = crypto.randomBytes(4).toString('hex') + '-';
+  for (let i = 0; i < 4; i++) {
+    const key = Math.random().toString(16).slice(2, 10) + '-';
     finalKey += key;
   }
   return finalKey.slice(0, -1);
@@ -47,13 +47,13 @@ exports.createLicense = async (req, res) => {
   try {
     const { user, plan } = req.body;
     const licenseKey = generateLicenseKey();
-    
+
     const license = new License({
       user,
       plan,
       licenseKey
     });
-    
+
     await license.save();
     res.status(201).json({
       message: 'License created successfully',
@@ -95,11 +95,11 @@ exports.verifyLicense = async (req, res) => {
   try {
     const { licenseKey } = req.body;
     const license = await License.findOne({ licenseKey }).populate('user plan');
-    
+
     if (!license) {
       return res.status(404).json({ message: 'Invalid license key' });
     }
-    
+
     res.json({
       isValid: true,
       license
