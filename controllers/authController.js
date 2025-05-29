@@ -6,27 +6,36 @@ const { generateToken, hashPassword, comparePassword } = require('../helpers/aut
 // @access  Public
 exports.register = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { username, email, password } = req.body;
 
-    // Check if user already exists
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+    // Check for duplicate username
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
+      return res.status(400).json({ message: 'Username is already taken' });
     }
+
+    // Check for duplicate email
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({ message: 'Email is already registered' });
+    }
+
 
     // Hash password
     const hashedPassword = await hashPassword(password);
 
     // Create user
     const user = await User.create({
+      username,
       email,
-      password: hashedPassword
+      password: hashedPassword,
     });
 
     res.status(201).json({
       message: 'User registered successfully',
       user: {
         _id: user._id,
+        username: user.username,
         email: user.email,
       }
     });

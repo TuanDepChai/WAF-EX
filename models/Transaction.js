@@ -11,6 +11,11 @@ const transactionSchema = new mongoose.Schema({
         ref: 'Plan',
         required: true
     },
+    status: {
+        type: String,
+        enum: ['pending', 'success', 'failed'],
+        default: 'pending'
+    },
     createdAt: {
         type: Date,
         default: Date.now
