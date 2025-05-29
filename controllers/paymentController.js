@@ -80,7 +80,7 @@ exports.vnpayReturn = async (req, res) => {
 
             // Create license for the user
             const licenseController = require('./licenseController');
-            await licenseController.createLicense({
+            const license = await licenseController.createLicense({
                 body: {
                     user: transaction.user,
                     plan: transaction.plan
@@ -91,7 +91,8 @@ exports.vnpayReturn = async (req, res) => {
 
             res.json({
                 message: 'Payment successful',
-                transaction
+                transaction,
+                license
             });
         } else {
             console.log('Payment failed for transaction:', transactionId);
