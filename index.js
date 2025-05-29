@@ -9,6 +9,7 @@ const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
 const planRoutes = require('./routes/planRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
+const licenseRoutes = require('./routes/licenseRoutes');
 
 const app = express();
 
@@ -29,6 +30,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/plans', planRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/licenses', licenseRoutes);
+
 
 // Error Handler (should be last)
 app.use(errorHandler);

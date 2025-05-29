@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const transactionSchema = new mongoose.Schema({
+const licenseSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -15,10 +15,13 @@ const transactionSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    updatedAt: {
-        type: Date,
-        default: Date.now
+    licenseKey: {
+        type: String,
+        required: true,
+        unique: true
     }
 });
 
-module.exports = mongoose.model('Transaction', transactionSchema);
+const License = mongoose.model('License', licenseSchema);
+
+module.exports = License;

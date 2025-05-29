@@ -1,16 +1,5 @@
 const Transaction = require('../models/Transaction');
-const { generateToken } = require('../helpers/authHelper'); // If you want to use activation key generation, adjust as needed
-const crypto = require('crypto');
-
-// Helper to generate activation key
-const generateActivationKey = () => {
-  let finalKey = '';
-  for(let i = 0; i < 4; i++) {
-    const key = crypto.randomBytes(4).toString('hex') + '-';
-    finalKey += key;
-  }
-  return finalKey.slice(0, -1);
-}
+const licenseController = require('./licenseController');
 
 // Get all transactions
 exports.getTransactions = async (req, res) => {
@@ -47,12 +36,9 @@ exports.getUserTransactions = async (req, res) => {
 exports.createTransaction = async (req, res) => {
   try {
     const { user, plan } = req.body;
-    // generate activation key
-    const activateKey = generateActivationKey();
     const transaction = new Transaction({
       user,
-      plan,
-      activateKey
+      plan
     });
     await transaction.save();
     res.status(201).json({
@@ -68,10 +54,16 @@ exports.createTransaction = async (req, res) => {
 exports.updateTransaction = async (req, res) => {
   try {
     const updateData = req.body;
-    // If status is being set to success, generate activation key
+    // If status is being set to success, create a new license
     if (updateData.status === 'success') {
-      updateData.activateKey = generateActivationKey();
+      await licenseController.createLicense({
+        body: {
+          user: updateData.user,
+          plan: updateData.plan
+        }
+      });
     }
+    
     const transaction = await Transaction.findByIdAndUpdate(
       req.params.id,
       updateData,

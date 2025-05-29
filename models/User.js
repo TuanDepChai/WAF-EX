@@ -13,7 +13,21 @@ const userSchema = new mongoose.Schema({
     required: true,
     minlength: 6
   },
+  phone: {
+    type: Number,
+    required: true,
+    unique: true,
+    trim: true
+  },
+  address: {
+    type: String,
+    trim: true
+  },
   createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
     type: Date,
     default: Date.now
   }
