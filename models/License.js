@@ -11,6 +11,11 @@ const licenseSchema = new mongoose.Schema({
         ref: 'Plan',
         required: true
     },
+    transaction: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Transaction',
+        required: true
+    },
     createdAt: {
         type: Date,
         default: Date.now
