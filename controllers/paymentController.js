@@ -88,11 +88,12 @@ exports.vnpayReturn = async (req, res) => {
             transaction.status = 'success';
             await transaction.save();
 
-            // Create license for the user
+            // Create license for the user, plan, and transaction
             const licenseKey = generateLicenseKey();
             const license = new License({
                 user: transaction.user,
                 plan: transaction.plan,
+                transaction: transaction._id,
                 licenseKey
             });
             await license.save();
@@ -101,7 +102,8 @@ exports.vnpayReturn = async (req, res) => {
 
             res.json({
                 message: 'Payment successful',
-                transaction,
+                transactionId: transaction._id,
+                licenseKey: license.licenseKey,
                 license
             });
         } else {
