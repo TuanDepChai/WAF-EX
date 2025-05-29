@@ -18,7 +18,7 @@ connectDB();
 
 // Middleware
 const corsOptions = {
-  origin: ['https://waf-fguard.vercel.app'], // or use a regex or environment variable
+  origin: [`${process.env.ORIGIN}`], // or use a regex or environment variable
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
 };
