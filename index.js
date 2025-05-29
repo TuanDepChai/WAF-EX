@@ -19,7 +19,8 @@ connectDB();
 
 // Middleware
 const corsOptions = {
-  origin: [`${process.env.ORIGIN}`], // or use a regex or environment variable
+  // origin: [`${process.env.ORIGIN}`], // or use a regex or environment variable
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
 };

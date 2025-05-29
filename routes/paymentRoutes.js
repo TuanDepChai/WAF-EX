@@ -7,7 +7,7 @@ const {
 } = require('../controllers/paymentController');
 
 // Create VNPay payment URL
-router.post('/vnpay', protect, createVNPayPayment);
+router.post('/create', protect, createVNPayPayment);
 
 // VNPay return URL
 router.get('/vnpay_return', vnpayReturn);
