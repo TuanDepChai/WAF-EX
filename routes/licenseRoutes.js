@@ -6,7 +6,8 @@ const {
     createLicense,
     updateLicense,
     deleteLicense,
-    verifyLicense
+    verifyLicense,
+    getUserLicenses
 } = require('../controllers/licenseController');
 
 router.route('/')
@@ -17,6 +18,9 @@ router.route('/:id')
     .get(getLicense)
     .put(updateLicense)
     .delete(deleteLicense);
+
+router.route('/user/:id')
+    .get(getUserLicenses);
 
 router.route('/verify')
     .post(verifyLicense);

@@ -14,7 +14,7 @@ const generateLicenseKey = () => {
 // Get all licenses
 exports.getLicenses = async (req, res) => {
   try {
-    const licenses = await License.find().populate('user plan');
+    const licenses = await License.find().populate('user plan transaction');
     res.json(licenses);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -24,8 +24,8 @@ exports.getLicenses = async (req, res) => {
 // Get single license
 exports.getLicense = async (req, res) => {
   try {
-    const license = await License.findById(req.params.id).populate('user plan');
-    if (!license) return res.status(404).json({ message: 'License not found' });
+    const license = await License.find({user: req.params.id}).populate('user plan transaction');
+    if (!license) return res.status(400).json({ message: 'License not found' });
     res.json(license);
   } catch (error) {
     res.status(500).json({ message: error.message });
