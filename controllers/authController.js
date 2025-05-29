@@ -70,6 +70,7 @@ exports.login = async (req, res) => {
       message: 'User logged in successfully',
       user: {
         _id: user._id,
+        username: user.username,
         email: user.email,
       },
       token
@@ -78,6 +79,25 @@ exports.login = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+// update profile
+exports.updateProfile = async (req, res) => {
+  try {
+    const { email, phone } = req.body;
+    const user = await User.findByIdAndUpdate(req.user.id, { email, phone }, { new: true });
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        phone: user.phone
+      }
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+}
 
 // @desc    Get current user profile
 // @route   GET /api/auth/me
