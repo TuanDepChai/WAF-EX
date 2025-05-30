@@ -35,7 +35,7 @@ exports.getLicense = async (req, res) => {
 // Get user licenses
 exports.getUserLicenses = async (req, res) => {
   try {
-    const licenses = await License.find({ user: req.user._id }).populate('plan');
+    const licenses = await License.find({ user: req.params.id }).populate('user plan transaction');
     res.json(licenses);
   } catch (error) {
     res.status(500).json({ message: error.message });
