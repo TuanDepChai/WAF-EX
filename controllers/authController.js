@@ -34,12 +34,12 @@ exports.register = async (req, res) => {
     // Send welcome email
     try {
       await transporter.sendMail({
-        from: '"Your App Name" <noreply@yourapp.com>',
+        from: '"F-Guard" <noreply@f-guard.vn>',
         to: email,
-        subject: 'Welcome to Our App!',
+        subject: 'Welcome to F-Guard',
         html: `
           <h1>Welcome ${username}!</h1>
-          <p>Thank you for registering with our application.</p>
+          <p>Thank you for registering with F-Guard.</p>
           <p>Your account has been successfully created.</p>
           <p>You can now login with your email and password.</p>
         `
