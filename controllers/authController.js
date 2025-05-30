@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const { generateToken, hashPassword, comparePassword } = require('../helpers/authHelper');
+const transporter = require('../config/email');
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -20,7 +21,6 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: 'Email is already registered' });
     }
 
-
     // Hash password
     const hashedPassword = await hashPassword(password);
 
@@ -30,6 +30,26 @@ exports.register = async (req, res) => {
       email,
       password: hashedPassword,
     });
+
+    // Send welcome email
+    try {
+      await transporter.sendMail({
+        from: '"Your App Name" <noreply@yourapp.com>',
+        to: email,
+        subject: 'Welcome to Our App!',
+        html: `
+          <h1>Welcome ${username}!</h1>
+          <p>Thank you for registering with our application.</p>
+          <p>Your account has been successfully created.</p>
+          <p>You can now login with your email and password.</p>
+        `
+      });
+    } catch (emailError) {
+      console.error('Error sending welcome email:', emailError);
+      // Don't return error to user, just log it
+    }
+
+    console.log("Sending email to:", email);
 
     res.status(201).json({
       message: 'User registered successfully',
