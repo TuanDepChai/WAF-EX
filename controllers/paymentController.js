@@ -98,6 +98,25 @@ exports.vnpayReturn = async (req, res) => {
             });
             await license.save();
 
+            try {
+                await transporter.sendMail({
+                    from: '"F-Guard" <noreply@f-guard.vn>',
+                    to: transaction.user.email,
+                    subject: 'Welcome to F-Guard',
+                    html: `
+                    <h1>Welcome ${transaction.user.username}!</h1>
+                    <p>Thank you for purchasing a license for F-Guard.</p>
+                    <p>Plan: ${transaction.plan.name}</p>
+                    <p>License Key: ${licenseKey}</p>
+                    <p>Please keep it safe and do not share it with anyone.</p>
+                    <p>If you have any questions, please contact us at support@f-guard.vn</p>
+                    <p>Thank you for choosing F-Guard!</p>
+                    `
+                })
+            } catch (emailError) {
+                console.error('Error sending welcome email:', emailError);
+            }
+
             console.log('License created for transaction:', transactionId);
 
             res.json({
