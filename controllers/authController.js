@@ -132,3 +132,28 @@ exports.getMe = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 }; 
+
+// @desc    Get all  with pagination
+// @route   GET /api/auth/users
+// @access  Private
+exports.getUsers = async (req, res) => {
+  const { page = 1, limit = 10 } = req.query;
+  const users = await User.find()
+    .select('-password')
+    .skip((page - 1) * limit)
+    .limit(parseInt(limit));
+  const totalUsers = await User.countDocuments();
+  res.json({
+    users,
+    totalUsers,
+    totalPages: Math.ceil(totalUsers / parseInt(limit)),
+    currentPage: parseInt(page)
+  });
+};
+
+// delete user
+exports.deleteUser = async (req, res) => {
+  const { id } = req.params;
+  await User.findByIdAndDelete(id);
+  res.json({ message: 'User deleted successfully' });
+};
