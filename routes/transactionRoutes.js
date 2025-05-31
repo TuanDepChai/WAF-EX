@@ -8,9 +8,8 @@ const {
   deleteTransaction,
   getUserTransactions
 } = require('../controllers/transactionController');
-
+const { protect } = require('../middleware/auth');
 router.route('/')
-  .get(getTransactions)
   .post(createTransaction);
 
 router.route('/:id')
@@ -20,5 +19,8 @@ router.route('/:id')
 
 router.route('/user/:id')
   .get(getUserTransactions);
+
+router.route('/admin/history')
+  .get(protect, getTransactions);
 
 module.exports = router; 

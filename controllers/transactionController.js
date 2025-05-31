@@ -1,11 +1,50 @@
 const Transaction = require('../models/Transaction');
+const Plan = require('../models/Plan');
 const licenseController = require('./licenseController');
 
-// Get all transactions
+// Get all transactions with pagination
 exports.getTransactions = async (req, res) => {
   try {
-    const transactions = await Transaction.find().populate('user plan');
-    res.json(transactions);
+    const { page = 1, limit = 10 } = req.query;
+    const transactions = await Transaction.find()
+      .populate('user plan')
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+    const totalTransactions = await Transaction.countDocuments();
+    const totalPages = Math.ceil(totalTransactions / parseInt(limit));
+    
+    // Get total amount and extract just the value
+    const totalAmountResult = await Plan.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: '$price' }
+        }
+      }
+    ]);
+    const totalTransactionMade = await Transaction.countDocuments();
+    // Get count of unique users who made transactions
+    const totalUserBought = await Transaction.aggregate([
+      {
+        $group: {
+          _id: '$user'
+        }
+      },
+      {
+        $count: 'totalUniqueUsers'
+      }
+    ]);
+    const totalAmount = totalAmountResult[0]?.totalAmount || 0;
+
+    res.json({
+      transactions,
+      totalTransactions,
+      totalPages,
+      currentPage: parseInt(page),
+      totalAmount,
+      totalTransactionMade,
+      totalUserBought: totalUserBought[0]?.totalUniqueUsers || 0
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -63,7 +102,7 @@ exports.updateTransaction = async (req, res) => {
         }
       });
     }
-    
+
     const transaction = await Transaction.findByIdAndUpdate(
       req.params.id,
       updateData,
