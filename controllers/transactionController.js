@@ -6,11 +6,12 @@ const licenseController = require('./licenseController');
 exports.getTransactions = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
-    const transactions = await Transaction.find()
+    const transactions = await Transaction.find({ status: { $in: ['success', 'failed'] } })
       .populate('user plan')
       .skip((page - 1) * limit)
       .limit(parseInt(limit));
-    const totalTransactions = await Transaction.countDocuments();
+    
+    const totalTransactions = await Transaction.countDocuments({ status: { $in: ['success', 'failed'] } });
     const totalPages = Math.ceil(totalTransactions / parseInt(limit));
     
     // Get total amount and extract just the value
@@ -22,9 +23,13 @@ exports.getTransactions = async (req, res) => {
         }
       }
     ]);
-    const totalTransactionMade = await Transaction.countDocuments();
-    // Get count of unique users who made transactions
+    const totalTransactionMade = await Transaction.countDocuments({ status: { $in: ['success', 'failed'] } });
+    
+    // Get count of unique users who made transactions (both success and failed)
     const totalUserBought = await Transaction.aggregate([
+      {
+        $match: { status: { $in: ['success', 'failed'] } }
+      },
       {
         $group: {
           _id: '$user'
@@ -34,6 +39,11 @@ exports.getTransactions = async (req, res) => {
         $count: 'totalUniqueUsers'
       }
     ]);
+
+    // Get separate counts for success and failed transactions
+    const successCount = await Transaction.countDocuments({ status: 'success' });
+    const failedCount = await Transaction.countDocuments({ status: 'failed' });
+
     const totalAmount = totalAmountResult[0]?.totalAmount || 0;
 
     res.json({
@@ -43,7 +53,9 @@ exports.getTransactions = async (req, res) => {
       currentPage: parseInt(page),
       totalAmount,
       totalTransactionMade,
-      totalUserBought: totalUserBought[0]?.totalUniqueUsers || 0
+      totalUserBought: totalUserBought[0]?.totalUniqueUsers || 0,
+      successCount,
+      failedCount
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
