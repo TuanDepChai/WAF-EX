@@ -5,13 +5,17 @@ const licenseController = require('./licenseController');
 // Get all transactions with pagination
 exports.getTransactions = async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
-    const transactions = await Transaction.find({ status: { $in: ['success', 'failed'] } })
+    const { page = 1, limit = 10, status } = req.query;
+    
+    // Create query object based on status parameter
+    const query = status ? { status: { $in: [status] } } : {};
+    
+    const transactions = await Transaction.find(query)
       .populate('user plan')
       .skip((page - 1) * limit)
       .limit(parseInt(limit));
     
-    const totalTransactions = await Transaction.countDocuments({ status: { $in: ['success', 'failed'] } });
+    const totalTransactions = await Transaction.countDocuments(query);
     const totalPages = Math.ceil(totalTransactions / parseInt(limit));
     
     // Get total amount and extract just the value
@@ -23,12 +27,12 @@ exports.getTransactions = async (req, res) => {
         }
       }
     ]);
-    const totalTransactionMade = await Transaction.countDocuments({ status: { $in: ['success', 'failed'] } });
+    const totalTransactionMade = await Transaction.countDocuments(query);
     
-    // Get count of unique users who made transactions (both success and failed)
+    // Get count of unique users who made transactions
     const totalUserBought = await Transaction.aggregate([
       {
-        $match: { status: { $in: ['success', 'failed'] } }
+        $match: query
       },
       {
         $group: {
