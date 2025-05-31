@@ -29,6 +29,7 @@ exports.register = async (req, res) => {
       username,
       email,
       password: hashedPassword,
+      role: 'user'
     });
 
     // Send welcome email
@@ -92,6 +93,7 @@ exports.login = async (req, res) => {
         _id: user._id,
         username: user.username,
         email: user.email,
+        role: user.role
       },
       token
     });
