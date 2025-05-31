@@ -18,15 +18,30 @@ exports.getTransactions = async (req, res) => {
     const totalTransactions = await Transaction.countDocuments(query);
     const totalPages = Math.ceil(totalTransactions / parseInt(limit));
     
-    // Get total amount and extract just the value
-    const totalAmountResult = await Plan.aggregate([
+    // Get total amount from successful transactions
+    const totalAmountResult = await Transaction.aggregate([
+      {
+        $match: { status: 'success' }
+      },
+      {
+        $lookup: {
+          from: 'plans',
+          localField: 'plan',
+          foreignField: '_id',
+          as: 'planDetails'
+        }
+      },
+      {
+        $unwind: '$planDetails'
+      },
       {
         $group: {
           _id: null,
-          totalAmount: { $sum: '$price' }
+          totalAmount: { $sum: '$planDetails.price' }
         }
       }
     ]);
+    
     const totalTransactionMade = await Transaction.countDocuments(query);
     
     // Get count of unique users who made transactions
